@@ -1,4 +1,4 @@
-# module convert.py
+# module convertTest.py
 #
 # Copyright (c) 2011  Andrea Grandi
 #
@@ -22,27 +22,18 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
+import unittest
+from convert import parseInput
 
-from pyparsing import nums, alphas, Word
-
-
-class UnitsOfMeasurement:
-    def __init__(self):
-        self.__dimensions = []
-    
+class Test(unittest.TestCase):
 
 
+    def testParseInput(self):
+        res = parseInput("10 km to miles")
+        self.assertEqual(res.value, '10')
+        self.assertEqual(res.srcUnit, 'km')
+        self.assertEqual(res.dstUnit, 'miles')
 
-
-   
-value = Word(nums).setResultsName("value")
-unit = Word(alphas).setResultsName
-input = value + unit("srcUnit") + "to" + unit("dstUnit")
-
-def parseInput(string): 
-    return input.parseString(string, parseAll=True)
-    
-    
-
-
-    
+if __name__ == "__main__":
+    #import sys;sys.argv = ['', 'Test.testParseInput']
+    unittest.main()
