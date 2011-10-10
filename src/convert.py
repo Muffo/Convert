@@ -24,25 +24,59 @@
 
 
 from pyparsing import *
+from itertools import izip
 
 
 class UnitsOfMeasurement:
-    def __init__(self):
-        self.__dimensions = []
-        self.scale = 0
-
-
-
+    def __init__(self, scale=1, dimensions=[]):
+        self.scale = scale
+        self.dimensions = dimensions
+     
     
+    def __mul__(self, x):
+        return UnitsOfMeasurement(self.scale * x.scale)
+    
+    def __div__(self, x):
+        return UnitsOfMeasurement(self.scale / x.scale)
+    
+    def __string__(self):
+        return "< scale = " + self.scale + " >"
+    
+
+def unitFromToken(token):
+    print token
+    print token.prefix
+    unit = UnitsOfMeasurement()
+    unit.scale = 1.343
+    unit.dimensions.append("T")
+    return unit
+
+
+def pairwise(iterable):
+    "s -> (s0,s1), (s2,s3), (s4, s5), ..."
+    a = iter(iterable)
+    return izip(a, a)
+
+def unitFromExpr(expr):
+    result = unitFromToken(expr[0])
+    for operator, token in pairwise(expr[1:]):
+        if operator == "*":
+            result *= unitFromToken(token)
+        else:
+            result /= unitFromToken(token)
+        
+    return result
+
+
 def parseInput(string): 
     
-    value = Word(nums).setResultsName("value")
+    value = Word(nums).setResultsName("value").setParseAction(lambda tokens: int(tokens[0]))
     prefix = oneOf("p n u m d h k M G T").setResultsName("prefix")
-    basicUnit = oneOf("m s h l mi in g N").setResultsName("basicUnit")
-    unitAtom = Combine( ( basicUnit | prefix + basicUnit) + Optional(Word(nums).setResultsName("exp")) )
-    operator = oneOf("* /")
-    unitExpr = unitAtom + ZeroOrMore(operator + unitAtom)
-    input = value + unitExpr("srcUnit") + "to" + unitExpr("dstUnit")
+    baseUnit = oneOf("m s h l mi in g N").setResultsName("baseUnit")
+    unitAtom = Combine( ( baseUnit | prefix + baseUnit) + Optional(Word(nums).setResultsName("exp")) ).setResultsName("unit")
+    operator = oneOf("* /").setResultsName("operator")
+    unitExpr = Group( unitAtom + ZeroOrMore(operator + unitAtom) )
+    input = value + unitExpr("srcExpr") + "to" + unitExpr("dstExpr")
     
     return input.parseString(string, parseAll=True)
     
