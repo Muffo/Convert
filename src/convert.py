@@ -29,7 +29,7 @@ from pyparsing import *
 class UnitsOfMeasurement:
     def __init__(self):
         self.__dimensions = []
-    
+        self.scale = 0
 
 
 
@@ -38,10 +38,10 @@ def parseInput(string):
     
     value = Word(nums).setResultsName("value")
     prefix = oneOf("p n u m d h k M G T").setResultsName("prefix")
-    basicUnit = oneOf("m s h l mi in").setResultsName("basicUnit")
+    basicUnit = oneOf("m s h l mi in g N").setResultsName("basicUnit")
     unitAtom = Combine( ( basicUnit | prefix + basicUnit) + Optional(Word(nums).setResultsName("exp")) )
     operator = oneOf("* /")
-    unitExpr = unitAtom + Optional(operator + unitAtom)
+    unitExpr = unitAtom + ZeroOrMore(operator + unitAtom)
     input = value + unitExpr("srcUnit") + "to" + unitExpr("dstUnit")
     
     return input.parseString(string, parseAll=True)

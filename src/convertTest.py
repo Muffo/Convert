@@ -35,6 +35,8 @@ class Test(unittest.TestCase):
         parseInput("10 Ml to dm3")
         
         parseInput("10 m/s to km/h")
+        parseInput("10 m/s2 to km/h2")
+        parseInput("10 N to kg*m/s2")
         parseInput("10 Ml to dm3")
         
         self.assertRaises(ParseException, lambda: parseInput("10 litres to m3"))
