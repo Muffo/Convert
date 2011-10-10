@@ -23,7 +23,7 @@
 #
 
 
-from pyparsing import nums, alphas, Word
+from pyparsing import *
 
 
 class UnitsOfMeasurement:
@@ -33,16 +33,20 @@ class UnitsOfMeasurement:
 
 
 
-
-   
-value = Word(nums).setResultsName("value")
-unit = Word(alphas).setResultsName
-input = value + unit("srcUnit") + "to" + unit("dstUnit")
-
+    
 def parseInput(string): 
+    
+    value = Word(nums).setResultsName("value")
+    prefix = oneOf("p n u m d h k M G T").setResultsName("prefix")
+    basicUnit = oneOf("m s h l mi in").setResultsName("basicUnit")
+    unitAtom = Combine( ( basicUnit | prefix + basicUnit) + Optional(Word(nums).setResultsName("exp")) )
+    operator = oneOf("* /")
+    unitExpr = unitAtom + Optional(operator + unitAtom)
+    input = value + unitExpr("srcUnit") + "to" + unitExpr("dstUnit")
+    
     return input.parseString(string, parseAll=True)
     
     
-
-
+def parseUnitOfMeasurement(string):
+    raise NotImplementedError
     

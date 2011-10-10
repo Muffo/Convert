@@ -24,16 +24,33 @@
 
 import unittest
 from convert import parseInput
+from pyparsing import ParseException
 
 class Test(unittest.TestCase):
 
 
+    def testParserException(self):
+        parseInput("10 km to mi")
+        parseInput("10 m2 to mi2")
+        parseInput("10 Ml to dm3")
+        
+        parseInput("10 m/s to km/h")
+        parseInput("10 Ml to dm3")
+        
+        self.assertRaises(ParseException, lambda: parseInput("10 litres to m3"))
+        self.assertRaises(ParseException, lambda: parseInput("10 Hl to m3"))
+        self.assertRaises(ParseException, lambda: parseInput("10 km3 to Km3"))
+
     def testParseInput(self):
-        res = parseInput("10 km to miles")
+        res = parseInput("10 km to mi")
+        print res
         self.assertEqual(res.value, '10')
-        self.assertEqual(res.srcUnit, 'km')
-        self.assertEqual(res.dstUnit, 'miles')
+        self.assertEqual(res.srcUnit.prefix, 'k')
+        self.assertEqual(res.srcUnit.basicUnit, 'm')
+        self.assertEqual(res.dstUnit.basicUnit, 'mi')
+        
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testParseInput']
     unittest.main()
+    
