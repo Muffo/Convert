@@ -45,17 +45,24 @@ class Test(unittest.TestCase):
 
     def testParseInput(self):
         res = parseInput("10 N to kg*m/s2")
-        print res
         self.assertEqual(res.value, 10)
  #       self.assertEqual(res.srcUnit.prefix, 'k')
  #       self.assertEqual(res.srcUnit.basicUnit, 'm')
  #       self.assertEqual(res.dstUnit.basicUnit, 'mi')
         
     
-    def testUnitObject(self):
+    def testUnitFromExpr(self):
         res = parseInput("10 N to kg*m/s2")
+
+        srcUnit = unitFromExpr(res.srcExpr)
         dstUnit = unitFromExpr(res.dstExpr)
-        print dstUnit
+        
+        self.assertEqual(srcUnit.scale, 0.001)
+        self.assertEqual(dstUnit.dimensions, {'M':1, 'L':1, 'T':-2})
+        self.assertEqual(dstUnit.scale, 1000)
+        self.assertEqual(dstUnit.dimensions, {'M':1, 'L':1, 'T':-2})
+        
+
         
 
 if __name__ == "__main__":
