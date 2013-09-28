@@ -72,7 +72,7 @@ class UnitOfMeasurement:
 
         Two UnitOfMeasurement are compatible if the dimensions are the same.
         The conversion between two UnitOfMeasurement can be done only if those are compatible.
-        In other words, it's not possible to add meter (length) and seconds (time).
+        In other words, it's not possible to convert meter (length) to seconds (time).
         """
         return self.dimensions == x.dimensions
 
@@ -102,7 +102,8 @@ class UnitOfMeasurement:
 #-------------------------------------------------------------
 
 def unitFromToken(token):
-    """Creates a UnitOfMeasurement from the given token"""
+    """Creates a UnitOfMeasurement from the given token
+    """
     unit = getBaseUnit(token.baseUnit)
     
     if token.prefix:
@@ -117,7 +118,8 @@ def unitFromToken(token):
 
   
 def unitFromExpr(expr):
-    """Creates a UnitOfMeasurement from the given expression"""
+    """Creates a UnitOfMeasurement from the given expression
+    """
     result = unitFromToken(expr[0])
     tokens = iter(expr[1:])
     for operator, unitToken in izip(tokens, tokens):
@@ -127,6 +129,9 @@ def unitFromExpr(expr):
 
 
 #-------------------------------------------------------------
+
+# This is the knowledge base used to perform the conversions
+# It is not supposed to be a comprehensive data set, but it can be easily expanded according to the specific needs.
 
 knownBaseUnits  = {'1': UnitOfMeasurement(1.0, {}),
                    'm': UnitOfMeasurement(1.0, {'L': 1}),
@@ -151,13 +156,12 @@ knownDimensions = {'length': {'L':1},
                    'area': {'L':2},
                    'volume': {'L':3},
                    'time': {'T': 1},
-                   'weigth': {'M': 1},
+                   'weight': {'M': 1},
                    'speed': {'T': -1, 'L':1},
                    'acceleration': {'T': -2, 'L':1}
                    }
 
 
-# Prefix according
 knownPrefix = {'p': 10**-12,
                'n': 10**-9,
                'u': 10**-6,
@@ -176,13 +180,22 @@ knownOperators = {'*': lambda x,y: x * y,
                   }
 
 def getBaseUnit(name):
+    """ Return a copy of the UnitOfMeasurement by name
+    """
     return copy.deepcopy(knownBaseUnits[name])
 
 
 #-------------------------------------------------------------
 
 def parseInput(string): 
-    
+    """ Parse the input string containing the expression
+
+    The expression must be in the form:
+
+        <value> <srcUnit> to <dstUnit>
+
+    The unit of measurements can be a complex expression containing multiplications, divisions and exponents.
+    """
     valueExpr = Word(nums + "." + "+" + "-" + "*" + "/" + "(" + ")" ).setResultsName("valueExpr")
     prefix = oneOf( " ".join(knownPrefix.keys()) ).setResultsName("prefix")
     baseUnit = oneOf( " ".join(knownBaseUnits.keys()) ).setResultsName("baseUnit")
@@ -196,7 +209,11 @@ def parseInput(string):
    
 
         
-def convert(value, srcUnit, dstUnit):    
+def convert(value, srcUnit, dstUnit):
+    """ Convert the value from the srcUnit to dstUnit
+
+    An exception is raised if the two UnitOfMeasurement are not compatible
+    """
     if not srcUnit.isCompatible(dstUnit):
         raise RuntimeError("Incompatible type " + srcUnit.dimensionsString() + " and " + dstUnit.dimensionsString() )
     
@@ -204,6 +221,8 @@ def convert(value, srcUnit, dstUnit):
 
 
 def convertString(string):
+    """ Parse the string containing an expression and return the result of the conversion
+    """
     res = parseInput(string) 
     srcUnit = unitFromExpr(res.srcExpr)
     dstUnit = unitFromExpr(res.dstExpr)
