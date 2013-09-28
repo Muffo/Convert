@@ -107,8 +107,10 @@ class UnitOfMeasurement:
             return str(self.dimensions)
         
 
+#-------------------------------------------------------------
 
 def unitFromToken(token):
+    """Creates a UnitOfMeasurement from the given token"""
     unit = getBaseUnit(token.baseUnit)
     
     if token.prefix:
@@ -123,6 +125,7 @@ def unitFromToken(token):
 
   
 def unitFromExpr(expr):
+    """Creates a UnitOfMeasurement from the given expression"""
     result = unitFromToken(expr[0])
     tokens = iter(expr[1:])
     for operator, unitToken in izip(tokens, tokens):
@@ -130,6 +133,8 @@ def unitFromExpr(expr):
         
     return result
 
+
+#-------------------------------------------------------------
 
 knownBaseUnits  = {'1': UnitOfMeasurement(1.0, {}),
                    'm': UnitOfMeasurement(1.0, {'L': 1}),
@@ -149,17 +154,14 @@ knownBaseUnits  = {'1': UnitOfMeasurement(1.0, {}),
                    'eur': UnitOfMeasurement(1.3662, {'V': 1})
                    }
 
-def getBaseUnit(name):
-    return copy.deepcopy(knownBaseUnits[name])
-
 
 knownDimensions = {'length': {'L':1},
                    'area': {'L':2},
                    'volume': {'L':3},
                    'time': {'T': 1},
                    'weigth': {'M': 1},
-                   'speed': {'T': -1, 'L':1}, 
-                   'acceleration': {'T': -2, 'L':1} 
+                   'speed': {'T': -1, 'L':1},
+                   'acceleration': {'T': -2, 'L':1}
                    }
 
 
@@ -175,15 +177,16 @@ knownPrefix = {'p': 10**-12,
                'T': 10**12,
                }
 
-knownOperators = {'*': lambda x,y: x * y, 
-                  '/': lambda x,y: x / y,  
+
+knownOperators = {'*': lambda x,y: x * y,
+                  '/': lambda x,y: x / y,
                   }
-    
-def findKey(dic, val):
-    """Return the key of dictionary dic given the value"""
-    return [k for k, v in dic.iteritems() if v == val][0]
+
+def getBaseUnit(name):
+    return copy.deepcopy(knownBaseUnits[name])
 
 
+#-------------------------------------------------------------
 
 def parseInput(string): 
     
@@ -199,10 +202,6 @@ def parseInput(string):
     return input.parseString(string, parseAll=True)
    
 
-class ConversionResult:
-    def __init__(self):
-        self.__src = None
-        
         
 def convert(value, srcUnit, dstUnit):    
     if not srcUnit.isCompatible(dstUnit):
