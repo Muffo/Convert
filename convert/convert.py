@@ -1,6 +1,6 @@
 # module convert.py
 #
-# Copyright (c) 2011  Andrea Grandi
+# Copyright (c) 2013  Andrea Grandi
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -23,20 +23,32 @@
 #
 
 
-from pyparsing import *
-from itertools import izip
 import copy
 import sys
+from itertools import izip
 
+from pyparsing import *
     
 
 class UnitOfMeasurement:
+    """Description of the unit of measurement
+
+    It contains the information used to manipulate different units and perform the conversion.
+
+    :param scale: multiplication factor used to convert the current UnitOfMeasurement to the base one
+    :param dimensions: dimensions of the unit. It can be time, length, weight or a combination of the previous
+    """
     def __init__(self, scale=1, dimensions={}):
         self.scale = scale
         self.dimensions = dimensions
      
     
     def __mul__(self, x):
+        """Multiplication of two UnitOfMeasurement classes
+
+        The results is a new UnitOfMeasurement where the scale is the product of the scales and the dimensions are the
+        sums of the dimensions
+        """
         result = UnitOfMeasurement(self.scale * x.scale)
         result.dimensions = dict( (n, self.dimensions.get(n, 0)+x.dimensions.get(n, 0)) 
                                   for n in set(self.dimensions)|set(x.dimensions) )
@@ -44,32 +56,58 @@ class UnitOfMeasurement:
             
             
     def __div__(self, x):
+        """Division of two UnitOfMeasurement classes
+
+        The results is a new UnitOfMeasurement where the scale is the division of the scales and the dimensions are the
+        differences of the dimensions
+        """
         result = UnitOfMeasurement(self.scale / x.scale)
         result.dimensions = dict( (n, self.dimensions.get(n, 0)-x.dimensions.get(n, 0)) 
                                   for n in set(self.dimensions)|set(x.dimensions) )
         return result
-    
+
+
     def __eq__(self, x):
+        """Equality of two UnitOfMeasurement classes
+
+        Two UnitOfMeasurement are equals if both the scale and the dimensions are the same
+        """
         return self.scale == x.scale and self.dimensions == self.dimensions
-    
-    def __str__(self):
-        return "< scale = " + self.scale + " dimensions = " +  self.dimensions +" >"
+
 
     def isCompatible(self, x):
+        """Compatibility of two UnitOfMeasurement classes
+
+        Two UnitOfMeasurement are compatible if the dimensions are the same.
+        The conversion between two UnitOfMeasurement can be done only if those are compatible.
+        In other words, it's not possible to add meter (length) and seconds (time).
+        """
         return self.dimensions == x.dimensions
-    
+
+
+    def conversionFactor(self, dest):
+        """Conversion factor between used to convert the current UnitOfMeasurement to the destination
+        """
+        return self.scale / dest.scale
+
+
+    def __str__(self):
+        """String description of the UnitOfMeasurement
+        """
+        return "< scale = " + self.scale + " dimensions = " +  self.dimensions +" >"
+
+
     def dimensionsString(self):
+        """String description of the dimensions
+        """
         abbrev = [k for k, v in knownDimensions.iteritems() if v == self.dimensions]
         if len(abbrev) == 1:
             return abbrev[0]
         else:
             return str(self.dimensions)
         
-    def conversionFactor(self, dest):
-        return self.scale / dest.scale
-    
-  
-  
+
+
 def unitFromToken(token):
     unit = getBaseUnit(token.baseUnit)
     
@@ -142,7 +180,7 @@ knownOperators = {'*': lambda x,y: x * y,
                   }
     
 def findKey(dic, val):
-    """return the key of dictionary dic given the value"""
+    """Return the key of dictionary dic given the value"""
     return [k for k, v in dic.iteritems() if v == val][0]
 
 
