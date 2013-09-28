@@ -23,8 +23,8 @@
 #
 
 import unittest
-from convert import *
 from pyparsing import ParseException
+from convert import *
 
 class Test(unittest.TestCase):
 
@@ -108,7 +108,8 @@ class Test(unittest.TestCase):
     
     def testConvert(self):
         self.assertRaises(RuntimeError, lambda: convertString("1 m to m2"))
-        
+
+
     def testConvert2(self):
         self.assertEqual(convertString("1 m to cm"), 100)
         self.assertEqual(convertString("1 m to mm"), 1000)
